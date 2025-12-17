@@ -1,17 +1,23 @@
-// db.js
-require("dotenv").config();      // 本機跑 node server.js 時會讀 .env，Railway 上會用它自己的 env
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+dotenv.config();
 
-const mysql = require("mysql2");
+const host = process.env.MYSQLHOST;
+const user = process.env.MYSQLUSER;
+const password = process.env.MYSQLPASSWORD;
+const database = process.env.MYSQLDATABASE;
+const port = Number(process.env.MYSQLPORT || 3306);
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT || 3306,
+if (!host || !user || !password || !database) {
+  throw new Error("[DB] Missing MYSQLHOST/MYSQLUSER/MYSQLPASSWORD/MYSQLDATABASE in Railway Variables.");
+}
+
+export const pool = mysql.createPool({
+  host,
+  user,
+  password,
+  database,
+  port,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
 });
-
-module.exports = pool.promise();
